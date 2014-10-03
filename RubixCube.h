@@ -14,12 +14,12 @@
 #include "main.h"
 
 // Default colors, unless overriden by user.
-#define R_COLOR0 0,0,0
-#define R_COLOR1 0,0,0
-#define R_COLOR2 0,0,0
-#define R_COLOR3 0,0,0
-#define R_COLOR4 0,0,0
-#define R_COLOR5 0,0,0
+#define R_COLOR0 1,1,1 // White
+#define R_COLOR1 0,0,1 // Blue
+#define R_COLOR2 1,0,0 // Red
+#define R_COLOR3 0,1,0 // Green
+#define R_COLOR4 1,0.5,0 // Orange
+#define R_COLOR5 1,1,0 // Yellow
 #define R_COLOR_HIDDEN 0.33, 0.33, 0.33 /* Default is Grey */
 
 // Various Directions
@@ -30,6 +30,10 @@
 #define LEFT 3
 #define BACK 4
 #define UNDER 5
+
+// Rotation Speed
+#define BLOCK_ROTATE_SPEED 100 /* msec to take for a row/col to turn 90 degrees */
+
 
 using std::queue;
 using std::stack;
@@ -48,22 +52,29 @@ public:
     RubixCube(const RubixCube& orig);
     virtual ~RubixCube();
     void draw(float);
-    int turn_side(int, int);
-    void update_cube();
+    int push_turn(int, int);
+    void update_cube(int);
     void solve_cube();
+    void print_debug();
+    void shuffle_cube();
 private:
+    struct core;
+    struct bridge;
     // The structure of the cube will have 3 layers.
     // The bridge blocks
     // Connects to adjacent Corners.
     struct bridge{
         Block *b;
         Block *c[2];
+        core* par[2];
+        
     };
     // The Core Blocks
     // Connects to adjacent bridges;
     struct core{
         Block *b;
         bridge *br[4];
+        int opp;
     };
     
     // The Corner Blocks
@@ -84,14 +95,21 @@ private:
         int direction;
     };
     // Now the queue
-    queue<queue_packet> q;
+    queue<queue_packet*> q;
     // We will also have an event log to help solve the rubix cube.
-    stack<queue_packet> log;
+    stack<queue_packet*> log;
     // The rubix cube will have 26 visible blocks.
     Color *colors[6];
     // The six sides;
     core *cores[6];
+    // I will also need variables to keep track of rotation.
+    int main_rotator;
+    int main_degrees;
+    int main_progress;
+    int opp_degrees;
+    int opp_progress;
     void setup_color(Color*, int, int, int, int);
+    void turn_side(int, int, bool);
 };
 
 #endif	/* RUBIXCUBE_H */

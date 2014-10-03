@@ -17,8 +17,9 @@ public:
     Block(int, Color*);
     Block(const Block& orig);
     virtual ~Block();
-    void draw(int);
+    void draw();
     void change_side_color(int, Color*);
+    void print_debug();
 private:
     // At most there will only be 3 visible sides
     // However, i will sent non visible sides to NULL because reasons.

@@ -19,7 +19,6 @@
 
 #define DELTA_TIME 10  /* defined to be 10 msec */
 #define CUBE_ROTATE_SPEED 500 /* msec to take for the cube to turn 90 degrees*/
-#define BLOCK_ROTATE_SPEED 100 /* msec to take for a row/col to turn 90 degrees */
 #define GAME_UPDATE_SPEED 25 /* in fps, how many times a second the game should update. */
 #define MAX_FRAME_SKIP 5 /* Max number of frames that the program can skip to update game mechanics */
 
@@ -109,6 +108,7 @@ void gl_setup(void) {
 
 void my_setup(int argc, char **argv) {
     next_game_tick = time(NULL);
+    rc.print_debug();
     theta = 0;
     return;
 }
@@ -158,12 +158,15 @@ void my_display(void) {
 	    0.0, 0.0, 0.0,  // x,y,z coord of the origin
 	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)
 	
-        glRotatef(theta++, 0, 1, 0);
+        // Setup placement of the Rubix Cube. Will be located at -1.5, -1.5
+        //glRotatef(theta++, 0, 1, 0);
+        glPushMatrix();
+        glTranslatef(-1.5, -1.5, -1.5);
 	// Setup Interpolation
 	interpolation = (float)(time(NULL)+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
         rc.draw(interpolation);
-        
+        glPopMatrix();
 	/* buffer is ready */
 	glutSwapBuffers();
 	
@@ -175,7 +178,7 @@ void my_idle(void) {
     loops = 0;
     while(time(NULL) > next_game_tick && loops < MAX_FRAME_SKIP){
         // Update Game Stuff
-        rc.update_cube();
+        rc.update_cube(SKIP_TICKS);
         
         // Update Timing Stuff
         next_game_tick += SKIP_TICKS;
