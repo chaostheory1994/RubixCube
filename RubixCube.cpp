@@ -50,7 +50,6 @@ RubixCube::RubixCube() {
         for(j = 1; j < 3; j++){
             cores[i*5]->br[j] = new bridge;
             cores[i*5]->br[j]->b = new Block(i*5, colors[i*5]);
-            cores[i*5]->br[j]->par[0] = cores[i*5];
             // Next we setup the corner Blocks
             for(k = 0; k < 2; k++){
                 cores[i*5]->br[j]->c[k] = new Block(i*5, colors[i*5]);
@@ -61,7 +60,6 @@ RubixCube::RubixCube() {
             // Lets create the new bridges
             cores[i*5]->br[j*3] = new bridge;
             cores[i*5]->br[j*3]->b = new Block(i*5, colors[i*5]);
-            cores[i*5]->br[j*3]->par[0] = cores[i*5];
             // Now lets link these to the correct corners.
             // Left Block
             cores[i*5]->br[j*3]->c[0] = cores[i*5]->br[1]->c[j/1];
@@ -84,7 +82,6 @@ RubixCube::RubixCube() {
             // I am going to hard link these later for sanity's sake!
             // Create the bridge's block.
             cores[i]->br[j]->b = new Block(i, colors[i]);
-            cores[i]->br[j]->par[0] = cores[i];
         }
         // Link Bridges
         if(i == 1) k = 2;
@@ -94,9 +91,6 @@ RubixCube::RubixCube() {
         // Set those colors.
         cores[i]->br[0]->b->change_side_color(i, colors[i]);
         cores[i]->br[3]->b->change_side_color(i, colors[i]);
-        // Setup parent nodes.
-        cores[i]->br[0]->par[1] = cores[i];
-        cores[i]->br[3]->par[1] = cores[i];
     }
     // Hard code links in.
     // Right side.
@@ -134,21 +128,11 @@ RubixCube::RubixCube() {
     cores[2]->br[1] = cores[3]->br[2];
     cores[2]->br[2] = cores[1]->br[2];
     cores[2]->br[3] = cores[5]->br[3];
-    // Parenting
-    cores[2]->br[0]->par[1] = cores[2];
-    cores[2]->br[1]->par[1] = cores[2];
-    cores[2]->br[2]->par[1] = cores[2];
-    cores[2]->br[3]->par[1] = cores[2];
     // Back Side
     cores[4]->br[0] = cores[0]->br[0];
     cores[4]->br[1] = cores[1]->br[1];
     cores[4]->br[2] = cores[3]->br[1];
     cores[4]->br[3] = cores[5]->br[0];
-    // Parenting
-    cores[4]->br[0]->par[1] = cores[4];
-    cores[4]->br[1]->par[1] = cores[4];
-    cores[4]->br[2]->par[1] = cores[4];
-    cores[4]->br[3]->par[1] = cores[4];
     //for(i = 0; i < 4; i++) cores[4]->br[i]->b->change_side_color(4, colors[4]);
     // Now  lets color those in.
     for(i = 2; i < 5; i+=2){
@@ -188,7 +172,7 @@ RubixCube::~RubixCube() {
     // Jobs done.
 }
 
-void RubixCube::setup_color(Color *c, int r, int g, int b, int id){
+void RubixCube::setup_color(Color *c, float r, float g, float b, int id){
     c->r = r;
     c->g = g;
     c->b = b;
@@ -487,14 +471,7 @@ void RubixCube::print_debug(){
             cores[i]->br[j]->c[1]->print_debug();
         }
     }
-    cout << "Printing bridge parents." << endl;
-    for(i = 0; i < 6; i++){
-        for(j = 0; j < 4; j++){
-            cout << "Side: " << i << " Bridge: " << j << endl;
-            cout << "Parent 0: " << cores[i]->br[j]->par[0]
-                    << " Parent 1: " << cores[i]->br[j]->par[1];
-        }
-    }
+	cout << check_integrity() << endl;
 }
 
 /*
@@ -516,17 +493,17 @@ void RubixCube::turn_side(int s, int d, bool anim){
     int dir;
     int i, j;
     bridge *temp;
-    core *t;
-    core *tfer;
+    core *t = NULL;
+    core *tfer = NULL;
     Block *temp_block;
     Color *temp_color;
     if( d < 0) dir = -1;
     else dir = 1;
     // Possible fix for clockwise problem and cube representations.
-    if(s == 1){
+    /*if(s == 1){
         if(d == -1) d = 1;
         else d = -1;
-    }
+    }*/
     // Lets update the cube's memory
     // We have the core number and its bridges. 
     // With that this will be cake.
@@ -539,35 +516,10 @@ void RubixCube::turn_side(int s, int d, bool anim){
         // This is a little tricky since we cant be sure which of the two parent nodes
         // are the node we are currently turning. As such we have to check.
         temp = cores[s]->br[0];
-        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
-            tfer = cores[s]->br[0]->par[i];
-            break;
-        }  
         cores[s]->br[0] = cores[s]->br[2];
-        for(i = 0; i < 2; i++) if(cores[s]->br[2]->par[i] != cores[s]){
-            t = cores[s]->br[2]->par[i];
-            cores[s]->br[2]->par[i] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[2] = cores[s]->br[3];
-        for(i = 0; i < 2; i++) if(cores[s]->br[3]->par[i] != cores[s]){
-            t = cores[s]->br[3]->par[i];
-            cores[s]->br[3]->par[i] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[3] = cores[s]->br[1];
-        for(i = 0; i < 2; i++) if(cores[s]->br[1]->par[i] != cores[s]){
-            t = cores[s]->br[1]->par[i];
-            cores[s]->br[1]->par[i] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[1] = temp;
-        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
-            cores[s]->br[1]->par[i] = tfer;
-        }
         // Fix orientations.
         temp_block = cores[s]->br[1]->c[0];
         cores[s]->br[1]->c[0] = cores[s]->br[1]->c[1];
@@ -581,37 +533,12 @@ void RubixCube::turn_side(int s, int d, bool anim){
     }
     else{
         // Clockwise
-        temp = cores[s]->br[0];
-        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
-            tfer = cores[s]->br[0]->par[i];
-            break;
-        }  
+        temp = cores[s]->br[0]; 
         cores[s]->br[0] = cores[s]->br[1];
-        for(i = 0; i < 2; i++) if(cores[s]->br[1]->par[i] != cores[s]){
-            t = cores[s]->br[1]->par[i];
-            cores[s]->br[1]->par[i] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[1] = cores[s]->br[3];
-        for(i = 0; i < 2; i++) if(cores[s]->br[3]->par[i] != cores[s]){
-            t = cores[s]->br[3]->par[i];
-            cores[s]->br[3]->par[i] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[3] = cores[s]->br[2];
-        for(i = 0; i < 2; i++) if(cores[s]->br[2]->par[i] != cores[s]){
-            t = cores[s]->br[2]->par[i];
-            cores[s]->br[1]->par[2] = tfer;
-            tfer = t;
-            break;
-        }
         cores[s]->br[2] = temp;
-        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
-            cores[s]->br[1]->par[i] = tfer;
-        }
-        
+		
         temp_block = cores[s]->br[0]->c[0];
         cores[s]->br[0]->c[0] = cores[s]->br[0]->c[1];
         cores[s]->br[0]->c[1] = temp_block;
@@ -621,75 +548,109 @@ void RubixCube::turn_side(int s, int d, bool anim){
         cores[s]->br[3]->c[1] = temp_block;
         
     }
-    // We need to fix the adjacent cores to point back to the bridge.
+	
     // We have to fix all the corners of the adjacent sides manually.
+	// For each of these, we only have to update the corners for 2 sides.
+	// This is because the bridges are being update and they are shared between adjacent sides.
+	// As such updating the top side bridges will update the top of the 2 adjacent sides that are shared between the top and the turning side.
+	// THen u update the opposite side (bottom in example) and will get all bridges update.
+	// We will still have to updat ethe bridges directly touching the turning side however.
     if(s == 0){
-        
-        // If the side is the top side
-        // Find the other parent
-        // This is done with a for loop.
-        for(j = 0; j < 4; j+=3){
-            for(i = 0; i < 2; i++)if(cores[0]->br[j]->par[i] != cores[0]){
-                t = cores[0]->br[j]->par[i];
-                break;
-            }
-            // Fix parent.
-            t->br[1]->c[0] = t->br[0]->c[0];
-            t->br[2]->c[0] = t->br[0]->c[1];
-        }
+		// Fixing Back and Top
+		cores[4]->br[0] = cores[0]->br[0];
+		cores[4]->br[1]->c[0] = cores[0]->br[0]->c[0];
+		cores[4]->br[2]->c[0] = cores[0]->br[0]->c[1];
+
+		// Left and Top
+		cores[3]->br[0] = cores[0]->br[1];
+
+		// Right and Top
+		cores[1]->br[0] = cores[0]->br[2];
+		
+		// Front and Top
+		cores[2]->br[0] = cores[0]->br[3];
+		cores[2]->br[1]->c[0] = cores[0]->br[3]->c[0];
+		cores[2]->br[2]->c[0] = cores[0]->br[3]->c[1];
     }
     else if(s == 5){
-        // If the side is the bottom side.
-        for(i = 0; i < 4; i+=3){
-            for(j = 0; j < 2; j++) if(cores[5]->br[i]->par[j] != cores[5]){
-                t = cores[5]->br[i]->par[j];
-                break;
-            }
-            t->br[1]->c[1] = t->br[3]->c[0];
-            t->br[2]->c[1] = t->br[3]->c[1];
-        }
+		// Same order as s == 1 except Bottom instead of Top.
+		cores[4]->br[3] = cores[5]->br[0];
+		cores[4]->br[1]->c[1] = cores[5]->br[0]->c[0];
+		cores[4]->br[2]->c[1] = cores[5]->br[0]->c[1];
+
+		cores[3]->br[3] = cores[5]->br[1];
+
+		cores[1]->br[3] = cores[5]->br[2];
+
+		cores[2]->br[3] = cores[5]->br[3];
+		cores[2]->br[1]->c[1] = cores[5]->br[3]->c[0];
+		cores[2]->br[2]->c[1] = cores[5]->br[3]->c[1];
     }
     else if(s == 1){
-        for(i = 0; i < 4; i+=3){
-            for(j = 0; j < 2; j++) if(cores[1]->br[i]->par[j] != cores[1]){
-                t = cores[1]->br[i]->par[j];
-                break;
-            }
-            t->br[0]->c[1] = t->br[2]->c[0];
-            t->br[3]->c[1] = t->br[2]->c[1];
-        }
+		// Updating Top and Right
+		cores[0]->br[2] = cores[1]->br[0];
+		cores[0]->br[0]->c[1] = cores[1]->br[0]->c[0];
+		cores[0]->br[3]->c[1] = cores[1]->br[0]->c[1];
+
+		// Updating Back and Right
+		cores[4]->br[2] = cores[1]->br[1];
+
+		// Updating Front and Right
+		cores[2]->br[2] = cores[1]->br[1];
+		
+		// Updating Bottom and Right
+		cores[5]->br[2] = cores[1]->br[3];
+		cores[5]->br[0]->c[1] = cores[1]->br[3]->c[0];
+		cores[5]->br[3]->c[1] = cores[1]->br[3]->c[1];
     }
     else if(s == 3){
-        for(i = 0; i < 4; i+=3){
-            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
-                t = cores[3]->br[i]->par[j];
-                break;
-            }
-            t->br[0]->c[0] = t->br[1]->c[0];
-            t->br[3]->c[0] = t->br[1]->c[1];
-        }
+        // Same order as s == 1 except Left instead of Right
+		cores[0]->br[1] = cores[3]->br[0];
+		cores[0]->br[0]->c[0] = cores[3]->br[0]->c[0];
+		cores[0]->br[3]->c[0] = cores[3]->br[0]->c[1];
+
+		cores[4]->br[1] = cores[3]->br[1];
+
+		cores[2]->br[1] = cores[3]->br[1];
+
+		cores[5]->br[1] = cores[3]->br[3];
+		cores[5]->br[0]->c[0] = cores[3]->br[3]->c[0];
+		cores[5]->br[3]->c[0] = cores[3]->br[3]->c[1];
     }
     else if(s == 2){
-        for(i = 0; i < 4; i+=3){
-            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
-                t = cores[3]->br[i]->par[j];
-                break;
-            }
-            t->br[1]->c[1] = t->br[3]->c[0];
-            t->br[2]->c[1] = t->br[3]->c[1];
-        }
+        // Updating Top and Front
+		cores[0]->br[3] = cores[2]->br[0];
+		cores[0]->br[1]->c[1] = cores[2]->br[0]->c[0];
+		cores[0]->br[2]->c[1] = cores[2]->br[0]->c[1];
+
+		// Updating Left and Front
+		cores[3]->br[2] = cores[2]->br[1];
+
+		// Updating Right and Front
+		cores[1]->br[2] = cores[2]->br[2];
+
+		// Updating Bottom and Front
+		cores[5]->br[3] = cores[2]->br[3];
+		cores[5]->br[1]->c[1] = cores[2]->br[3]->c[0];
+		cores[5]->br[2]->c[1] = cores[2]->br[3]->c[1];
     }
     else if(s == 4){
-        for(i = 0; i < 4; i+=3){
-            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
-                t = cores[3]->br[i]->par[j];
-                break;
-            }
-            t->br[1]->c[0] = t->br[0]->c[0];
-            t->br[2]->c[0] = t->br[0]->c[1];
-        }
+		// Same order as s == 2 except Back instead of Front
+		cores[0]->br[0] = cores[4]->br[0];
+		cores[0]->br[1]->c[0] = cores[4]->br[0]->c[0];
+		cores[0]->br[2]->c[0] = cores[4]->br[0]->c[1];
+
+		cores[3]->br[1] = cores[4]->br[1];
+
+		cores[1]->br[1] = cores[4]->br[2];
+
+		cores[5]->br[0] = cores[4]->br[3];
+		cores[5]->br[1]->c[0] = cores[4]->br[3]->c[0];
+		cores[5]->br[2]->c[0] = cores[4]->br[3]->c[1];
     }
-    /*
+	
+	
+    
     // Now we rotate the individual blocks.
     cores[s]->br[0]->c[0]->rotate_block(s, d);
     cores[s]->br[0]->b->rotate_block(s, d);
@@ -701,7 +662,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
     
     cores[s]->br[1]->b->rotate_block(s, d);
     cores[s]->br[2]->b->rotate_block(s, d);
-    */
+    
 }
 
 /* This is an obvious method. It will randomly shuffle the cube
@@ -713,6 +674,26 @@ void RubixCube::turn_side(int s, int d, bool anim){
 void RubixCube::shuffle_cube(int i){
     if(i == 1) turn_side(5, 1, false);
     if(i == 2) turn_side(5, -1, false);
-    if(i == 3) turn_side(1, 1, false);
+    if(i == 3) turn_side(3, 1, false);
     if(i == 4) turn_side(2, 1, false);
+	print_debug();
+}
+
+bool RubixCube::check_integrity(){
+	if (cores[0]->br[0] != cores[4]->br[0]) cout << "Top Back Failed" << endl;
+	if (cores[0]->br[1] != cores[3]->br[0]) cout << "Top Left Failed" << endl;
+	if (cores[0]->br[2] != cores[1]->br[0]) cout << "Top Right Failed" << endl;
+	if (cores[0]->br[3] != cores[2]->br[0]) cout << "Top Front Failed" << endl;
+	if (cores[5]->br[0] != cores[4]->br[3]) cout << "Bottom Back Failed" << endl;
+	if (cores[5]->br[1] != cores[3]->br[3]) cout << "Bottom Left Failed" << endl;
+	if (cores[5]->br[2] != cores[1]->br[3]) cout << "Bottom Right Failed" << endl;
+	if (cores[5]->br[3] != cores[2]->br[3]) cout << "Bottom Front Failed" << endl;
+	return (cores[0]->br[0] == cores[4]->br[0] &&
+		cores[0]->br[1] == cores[3]->br[0] &&
+		cores[0]->br[2] == cores[1]->br[0] &&
+		cores[0]->br[3] == cores[2]->br[0] &&
+		cores[5]->br[0] == cores[4]->br[3] &&
+		cores[5]->br[1] == cores[3]->br[3] &&
+		cores[5]->br[2] == cores[1]->br[3] &&
+		cores[5]->br[3] == cores[2]->br[3]);
 }

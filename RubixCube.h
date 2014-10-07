@@ -18,7 +18,7 @@
 #define R_COLOR1 0,0,1 // Blue
 #define R_COLOR2 1,0,0 // Red
 #define R_COLOR3 0,1,0 // Green
-#define R_COLOR4 1,0,0.5 // Orange
+#define R_COLOR4 1,0.5,0 // Orange
 #define R_COLOR5 1,1,0 // Yellow
 #define R_COLOR_HIDDEN 0.33, 0.33, 0.33 /* Default is Grey */
 
@@ -57,6 +57,7 @@ public:
     void solve_cube();
     void print_debug();
     void shuffle_cube(int);
+	bool check_integrity();
 private:
     struct core;
     struct bridge;
@@ -66,7 +67,6 @@ private:
     struct bridge{
         Block *b;
         Block *c[2];
-        core* par[2];
         
     };
     // The Core Blocks
@@ -108,7 +108,7 @@ private:
     int main_progress;
     int opp_degrees;
     int opp_progress;
-    void setup_color(Color*, int, int, int, int);
+    void setup_color(Color*, float, float, float, int);
     void turn_side(int, int, bool);
 };
 

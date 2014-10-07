@@ -40,7 +40,8 @@ RubixCube rc;
 time_t next_game_tick;
 float interpolation;
 int loops;
-int theta;
+int thetaX;
+int thetaY;
 
 void myabort(void) {
 	abort();
@@ -108,8 +109,9 @@ void gl_setup(void) {
 
 void my_setup(int argc, char **argv) {
     next_game_tick = time(NULL);
-    rc.print_debug();
-    theta = 0;
+	rc.print_debug();
+    thetaX = 0;
+	thetaY = 0;
     return;
 }
 
@@ -125,6 +127,12 @@ void my_reshape(int w, int h) {
 void my_keyboard( unsigned char key, int x, int y ) {
 	
 	switch( key ) {
+		case 'x':
+			thetaX++;
+			break;
+		case 'y':
+			thetaY++;
+			break;
             case 't':
                 rc.shuffle_cube(1);
                 break;
@@ -133,6 +141,7 @@ void my_keyboard( unsigned char key, int x, int y ) {
                 break;
             case 'e':
                 rc.shuffle_cube(3);
+				rc.print_debug();
                 break;
             case 'w':
                 rc.shuffle_cube(4);
@@ -156,6 +165,9 @@ void my_mouse_drag(int x, int y) {
  that is, (0,0) is at the upper left corner
  */
 void my_mouse(int button, int state, int mousex, int mousey) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+		
+	}
 }
 
 void my_display(void) {
@@ -171,7 +183,8 @@ void my_display(void) {
 	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)
 	
         // Setup placement of the Rubix Cube. Will be located at -1.5, -1.5
-        glRotatef(theta++, 0, 1, 0);
+        glRotatef(thetaX, 0, 1, 0);
+		glRotatef(thetaY, 1, 0, 0);
         glPushMatrix();
         glTranslatef(-1.5, -1.5, -1.5);
 	// Setup Interpolation

@@ -163,12 +163,12 @@ void Block::rotate_block(int s, int d){
                 break;
             case 2:
             case 4:
-                temp = sides[0];
-                sides[0] = sides[1];
-                sides[1] = sides[5];
-                sides[5] = sides[3];
-                sides[3] = temp;
-                break;
+				temp = sides[0];
+				sides[0] = sides[3];
+				sides[3] = sides[5];
+				sides[5] = sides[1];
+				sides[1] = temp;
+				break;
         }
     }
     else {
@@ -191,12 +191,12 @@ void Block::rotate_block(int s, int d){
                 break;
             case 2:
             case 4:
-                temp = sides[0];
-                sides[0] = sides[3];
-                sides[3] = sides[5];
-                sides[5] = sides[1];
-                sides[1] = temp;
-                break;
+				temp = sides[0];
+				sides[0] = sides[1];
+				sides[1] = sides[5];
+				sides[5] = sides[3];
+				sides[3] = temp;
+				break;
         }
     }
 }
