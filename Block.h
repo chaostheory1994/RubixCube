@@ -20,11 +20,15 @@ public:
     void draw();
     void change_side_color(int, Color*);
     void print_debug();
+    Color *get_color(int);
+    void rotate_block(int, int);
 private:
     // At most there will only be 3 visible sides
     // However, i will sent non visible sides to NULL because reasons.
     // 0 = Top 1 = Right 2 = Front 3 = Left 4 = back 5 = Bottom
     Color *sides[6];
+    // Rotation variables
+    int rotX, rotY, rotZ;
 };
 
 #endif	/* BLOCK_H */

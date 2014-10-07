@@ -100,15 +100,15 @@ RubixCube::RubixCube() {
     }
     // Hard code links in.
     // Right side.
-    cores[1]->br[1]->c[0] = cores[0]->br[2]->c[1];
-    cores[1]->br[2]->c[0] = cores[0]->br[2]->c[0];
+    cores[1]->br[1]->c[0] = cores[0]->br[2]->c[0];
+    cores[1]->br[2]->c[0] = cores[0]->br[2]->c[1];
     cores[1]->br[1]->c[1] = cores[5]->br[2]->c[0];
     cores[1]->br[2]->c[1] = cores[5]->br[2]->c[1];
     // Left side.
     cores[3]->br[1]->c[0] = cores[0]->br[1]->c[0];
     cores[3]->br[2]->c[0] = cores[0]->br[1]->c[1];
-    cores[3]->br[1]->c[1] = cores[5]->br[1]->c[1];
-    cores[3]->br[2]->c[1] = cores[5]->br[1]->c[0];
+    cores[3]->br[1]->c[1] = cores[5]->br[1]->c[0];
+    cores[3]->br[2]->c[1] = cores[5]->br[1]->c[1];
     // Set the colors.
     // Right side.
     cores[1]->br[1]->c[0]->change_side_color(1, colors[1]);
@@ -132,8 +132,8 @@ RubixCube::RubixCube() {
     // Front Side
     cores[2]->br[0] = cores[0]->br[3];
     cores[2]->br[1] = cores[3]->br[2];
-    cores[2]->br[2] = cores[1]->br[1];
-    cores[2]->br[3] = cores[5]->br[0];
+    cores[2]->br[2] = cores[1]->br[2];
+    cores[2]->br[3] = cores[5]->br[3];
     // Parenting
     cores[2]->br[0]->par[1] = cores[2];
     cores[2]->br[1]->par[1] = cores[2];
@@ -141,9 +141,9 @@ RubixCube::RubixCube() {
     cores[2]->br[3]->par[1] = cores[2];
     // Back Side
     cores[4]->br[0] = cores[0]->br[0];
-    cores[4]->br[1] = cores[1]->br[2];
+    cores[4]->br[1] = cores[1]->br[1];
     cores[4]->br[2] = cores[3]->br[1];
-    cores[4]->br[3] = cores[5]->br[3];
+    cores[4]->br[3] = cores[5]->br[0];
     // Parenting
     cores[4]->br[0]->par[1] = cores[4];
     cores[4]->br[1]->par[1] = cores[4];
@@ -201,6 +201,8 @@ void RubixCube::setup_color(Color *c, int r, int g, int b, int id){
  */
 void RubixCube::draw(float f){
     int i;
+    int rotation_main = main_degrees - (main_progress + (main_degrees * f));
+    int rotation_opp = opp_degrees - (opp_progress + (opp_degrees * f));
     // This is where we draw a cube! Yay!
     // Since we assume we've been translated to the lower left corner of the cube.
     // We can just start to draw.
@@ -209,131 +211,195 @@ void RubixCube::draw(float f){
     // These if statements are pretty ugly and im sorry for that.
     // They basically just print the sides that are able to turn.
     // Then fill in the middle layer.
-    if(main_rotator == 0 || main_rotator == 5 || main_rotator == -1){
         // Default but also the rotation on the Y axis.
         // Now we draw the top side.
         glPushMatrix();
         glTranslatef(0, 2, 0);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Left, Front Rotation
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[0]->br[3]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 2, 0);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Front
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[0]->br[3]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 2, 0);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Front, Right
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[0]->br[3]->c[1]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(0, 2, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Left
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         cores[0]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 2, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         cores[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 2, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Right
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         cores[0]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(0, 2, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Back, Left
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[0]->br[0]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 2, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Back
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[0]->br[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 2, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Top, Back, Right
+        if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[0]->br[0]->c[1]->draw();
         glPopMatrix();
         // Lets draw the bottom layer now
         glPushMatrix();
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Bottom, Front, Left
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         // Placed at front left of cube layer.
-        cores[5]->br[0]->c[0]->draw();
+        cores[5]->br[3]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 0, 0);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
-        cores[5]->br[0]->b->draw();
+        // Bottom, Front
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        cores[5]->br[3]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 0, 0);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
-        cores[5]->br[0]->c[1]->draw();
+        // Bottom, Front, Right
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        cores[5]->br[3]->c[1]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(0, 0, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Bottom, Left
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         cores[5]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 0, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Bottom
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         cores[5]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 0, 1);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
+        // Bottom Right
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         cores[5]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(0, 0, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
-        cores[5]->br[3]->c[0]->draw();
+        // Bottom, Back, Left
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        cores[5]->br[0]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(1, 0, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
-        cores[5]->br[3]->b->draw();
+        // Bottom, Back
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        cores[5]->br[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(2, 0, 2);
-        glRotatef(main_degrees - main_progress, 0, 1, 0);
-        cores[5]->br[3]->c[1]->draw();
+        // Bottom, Back, Right
+        if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        cores[5]->br[0]->c[1]->draw();
         glPopMatrix();
         // Draw the rest
         glPushMatrix();
         glTranslatef(0, 1, 0);
+        // Front, Left
+        if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[2]->br[1]->b->draw();
-        glTranslatef(1, 0, 0);
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(1, 1, 0);
+        // Front
+        if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[2]->b->draw();
-        glTranslatef(1, 0, 0);
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(2, 1, 0);
+        // Front Right
+        if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
         cores[2]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
         glTranslatef(0, 1, 2);
+        // Back, Left
+        if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[4]->br[2]->b->draw();
-        glTranslatef(1, 0, 0);
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(1, 1, 2);
+        // Back
+        if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[4]->b->draw();
-        glTranslatef(1, 0, 0);
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(2, 1, 2);
+        // Back Right
+        if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         cores[4]->br[1]->b->draw();
         glPopMatrix();
         // Draw Final 2 cores
         glPushMatrix();
         glTranslatef(0, 1, 1);
+        // Left
+        if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         cores[3]->b->draw();
-        glTranslatef(2, 0, 0);
+        glPopMatrix();
+        glPushMatrix();
+        glTranslatef(2, 1, 1);
+        // Right
+        if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         cores[1]->b->draw();
         glPopMatrix();
-    }
-    else if(main_rotator == 1 || main_rotator == 3){
-        // Drawing with the rotational axis on the X axis
-    }
-    else if(main_rotator == 2 || main_rotator == 4){
-        // Drawing with the rotational axis on the Z axis
-    }
     glColor3f(0,0,0);
 }
 
@@ -441,13 +507,212 @@ void RubixCube::print_debug(){
  * Only the adjacent side will.
  * d: The direction. < 0 is counterclockwise >= 0 is clockwise
  * anim: a boolean to say if we should animate this turn or not.
+ * anim is mainly used by the shuffle method as to free the user from watching it shuffle.
  */
 void RubixCube::turn_side(int s, int d, bool anim){
     // We can assume this is a valid turn.
     // First lets update the cube.
     // Each core has its opposite side and as such we know which sides dont get changed.
     int dir;
+    int i, j;
+    bridge *temp;
+    core *t;
+    core *tfer;
+    Block *temp_block;
+    Color *temp_color;
     if( d < 0) dir = -1;
     else dir = 1;
+    // Possible fix for clockwise problem and cube representations.
+    if(s == 1){
+        if(d == -1) d = 1;
+        else d = -1;
+    }
+    // Lets update the cube's memory
+    // We have the core number and its bridges. 
+    // With that this will be cake.
+    // Which direction are we going?
+    if(dir < 0){
+        // CClockwise.
+        // All we have to do is setup the bridges.
+        // Then a loop should be able to clean up the rest.
+        // We also have to update the bridge's parrent node as well.
+        // This is a little tricky since we cant be sure which of the two parent nodes
+        // are the node we are currently turning. As such we have to check.
+        temp = cores[s]->br[0];
+        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
+            tfer = cores[s]->br[0]->par[i];
+            break;
+        }  
+        cores[s]->br[0] = cores[s]->br[2];
+        for(i = 0; i < 2; i++) if(cores[s]->br[2]->par[i] != cores[s]){
+            t = cores[s]->br[2]->par[i];
+            cores[s]->br[2]->par[i] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[2] = cores[s]->br[3];
+        for(i = 0; i < 2; i++) if(cores[s]->br[3]->par[i] != cores[s]){
+            t = cores[s]->br[3]->par[i];
+            cores[s]->br[3]->par[i] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[3] = cores[s]->br[1];
+        for(i = 0; i < 2; i++) if(cores[s]->br[1]->par[i] != cores[s]){
+            t = cores[s]->br[1]->par[i];
+            cores[s]->br[1]->par[i] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[1] = temp;
+        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
+            cores[s]->br[1]->par[i] = tfer;
+        }
+        // Fix orientations.
+        temp_block = cores[s]->br[1]->c[0];
+        cores[s]->br[1]->c[0] = cores[s]->br[1]->c[1];
+        cores[s]->br[1]->c[1] = temp_block;
+        
+        
+        temp_block = cores[s]->br[2]->c[0];
+        cores[s]->br[2]->c[0] = cores[s]->br[2]->c[1];
+        cores[s]->br[2]->c[1] = temp_block;
+        
+    }
+    else{
+        // Clockwise
+        temp = cores[s]->br[0];
+        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
+            tfer = cores[s]->br[0]->par[i];
+            break;
+        }  
+        cores[s]->br[0] = cores[s]->br[1];
+        for(i = 0; i < 2; i++) if(cores[s]->br[1]->par[i] != cores[s]){
+            t = cores[s]->br[1]->par[i];
+            cores[s]->br[1]->par[i] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[1] = cores[s]->br[3];
+        for(i = 0; i < 2; i++) if(cores[s]->br[3]->par[i] != cores[s]){
+            t = cores[s]->br[3]->par[i];
+            cores[s]->br[3]->par[i] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[3] = cores[s]->br[2];
+        for(i = 0; i < 2; i++) if(cores[s]->br[2]->par[i] != cores[s]){
+            t = cores[s]->br[2]->par[i];
+            cores[s]->br[1]->par[2] = tfer;
+            tfer = t;
+            break;
+        }
+        cores[s]->br[2] = temp;
+        for(i = 0; i < 2; i++) if(cores[s]->br[0]->par[i] != cores[s]){
+            cores[s]->br[1]->par[i] = tfer;
+        }
+        
+        temp_block = cores[s]->br[0]->c[0];
+        cores[s]->br[0]->c[0] = cores[s]->br[0]->c[1];
+        cores[s]->br[0]->c[1] = temp_block;
+        
+        temp_block = cores[s]->br[3]->c[0];
+        cores[s]->br[3]->c[0] = cores[s]->br[3]->c[1];
+        cores[s]->br[3]->c[1] = temp_block;
+        
+    }
+    // We need to fix the adjacent cores to point back to the bridge.
+    // We have to fix all the corners of the adjacent sides manually.
+    if(s == 0){
+        
+        // If the side is the top side
+        // Find the other parent
+        // This is done with a for loop.
+        for(j = 0; j < 4; j+=3){
+            for(i = 0; i < 2; i++)if(cores[0]->br[j]->par[i] != cores[0]){
+                t = cores[0]->br[j]->par[i];
+                break;
+            }
+            // Fix parent.
+            t->br[1]->c[0] = t->br[0]->c[0];
+            t->br[2]->c[0] = t->br[0]->c[1];
+        }
+    }
+    else if(s == 5){
+        // If the side is the bottom side.
+        for(i = 0; i < 4; i+=3){
+            for(j = 0; j < 2; j++) if(cores[5]->br[i]->par[j] != cores[5]){
+                t = cores[5]->br[i]->par[j];
+                break;
+            }
+            t->br[1]->c[1] = t->br[3]->c[0];
+            t->br[2]->c[1] = t->br[3]->c[1];
+        }
+    }
+    else if(s == 1){
+        for(i = 0; i < 4; i+=3){
+            for(j = 0; j < 2; j++) if(cores[1]->br[i]->par[j] != cores[1]){
+                t = cores[1]->br[i]->par[j];
+                break;
+            }
+            t->br[0]->c[1] = t->br[2]->c[0];
+            t->br[3]->c[1] = t->br[2]->c[1];
+        }
+    }
+    else if(s == 3){
+        for(i = 0; i < 4; i+=3){
+            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
+                t = cores[3]->br[i]->par[j];
+                break;
+            }
+            t->br[0]->c[0] = t->br[1]->c[0];
+            t->br[3]->c[0] = t->br[1]->c[1];
+        }
+    }
+    else if(s == 2){
+        for(i = 0; i < 4; i+=3){
+            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
+                t = cores[3]->br[i]->par[j];
+                break;
+            }
+            t->br[1]->c[1] = t->br[3]->c[0];
+            t->br[2]->c[1] = t->br[3]->c[1];
+        }
+    }
+    else if(s == 4){
+        for(i = 0; i < 4; i+=3){
+            for(j = 0; j < 2; j++) if(cores[3]->br[i]->par[j] != cores[3]){
+                t = cores[3]->br[i]->par[j];
+                break;
+            }
+            t->br[1]->c[0] = t->br[0]->c[0];
+            t->br[2]->c[0] = t->br[0]->c[1];
+        }
+    }
+    /*
+    // Now we rotate the individual blocks.
+    cores[s]->br[0]->c[0]->rotate_block(s, d);
+    cores[s]->br[0]->b->rotate_block(s, d);
+    cores[s]->br[0]->c[1]->rotate_block(s, d);
     
+    cores[s]->br[3]->c[0]->rotate_block(s, d);
+    cores[s]->br[3]->b->rotate_block(s, d);
+    cores[s]->br[3]->c[1]->rotate_block(s, d);
+    
+    cores[s]->br[1]->b->rotate_block(s, d);
+    cores[s]->br[2]->b->rotate_block(s, d);
+    */
+}
+
+/* This is an obvious method. It will randomly shuffle the cube
+ * It will also add the events to the action log.
+ * It will turn the cube without making animations.
+ * This way the user cant see it shuffle.
+ * Usually used to initialize a random cube.
+ */
+void RubixCube::shuffle_cube(int i){
+    if(i == 1) turn_side(5, 1, false);
+    if(i == 2) turn_side(5, -1, false);
+    if(i == 3) turn_side(1, 1, false);
+    if(i == 4) turn_side(2, 1, false);
 }

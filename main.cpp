@@ -125,6 +125,18 @@ void my_reshape(int w, int h) {
 void my_keyboard( unsigned char key, int x, int y ) {
 	
 	switch( key ) {
+            case 't':
+                rc.shuffle_cube(1);
+                break;
+            case 'r':
+                rc.shuffle_cube(2);
+                break;
+            case 'e':
+                rc.shuffle_cube(3);
+                break;
+            case 'w':
+                rc.shuffle_cube(4);
+                break;
 		case 'q': 
 		case 'Q':
 			exit(0) ;
@@ -159,7 +171,7 @@ void my_display(void) {
 	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)
 	
         // Setup placement of the Rubix Cube. Will be located at -1.5, -1.5
-        //glRotatef(theta++, 0, 1, 0);
+        glRotatef(theta++, 0, 1, 0);
         glPushMatrix();
         glTranslatef(-1.5, -1.5, -1.5);
 	// Setup Interpolation
