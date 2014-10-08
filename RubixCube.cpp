@@ -11,6 +11,7 @@
 #include <queue>
 #include <stack>
 #include <iostream>
+#include <cmath>
 #include "main.h"
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
@@ -198,69 +199,69 @@ void RubixCube::draw(float f){
         // Default but also the rotation on the Y axis.
         // Now we draw the top side.
         glPushMatrix();
-        glTranslatef(0, 2, 0);
         // Top, Left, Front Rotation
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(-1.5, 0.5, -1.5);
         cores[0]->br[3]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 2, 0);
         // Top, Front
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(-0.5, 0.5, -1.5);
         cores[0]->br[3]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 2, 0);
         // Top, Front, Right
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(0.5, 0.5, -1.5);
         cores[0]->br[3]->c[1]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(0, 2, 1);
         // Top, Left
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        glTranslatef(-1.5, 0.5, -0.5);
         cores[0]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 2, 1);
         // Top
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
+        glTranslatef(-0.5, 0.5, -0.5);
         cores[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 2, 1);
         // Top, Right
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        glTranslatef(0.5, 0.5, -0.5);
         cores[0]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(0, 2, 2);
         // Top, Back, Left
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-1.5, 0.5, 0.5);
         cores[0]->br[0]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 2, 2);
         // Top, Back
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-0.5, 0.5, 0.5);
         cores[0]->br[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 2, 2);
         // Top, Back, Right
         if(main_rotator == 0) glRotatef(rotation_main, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(0.5, 0.5, 0.5);
         cores[0]->br[0]->c[1]->draw();
         glPopMatrix();
         // Lets draw the bottom layer now
@@ -269,119 +270,120 @@ void RubixCube::draw(float f){
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+		glTranslatef(-1.5, -1.5, -1.5);
         // Placed at front left of cube layer.
         cores[5]->br[3]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 0, 0);
         // Bottom, Front
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(-0.5, -1.5, -1.5);
         cores[5]->br[3]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 0, 0);
         // Bottom, Front, Right
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+		glTranslatef(0.5, -1.5, -1.5);
         cores[5]->br[3]->c[1]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(0, 0, 1);
         // Bottom, Left
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        glTranslatef(-1.5, -1.5, -0.5);
         cores[5]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 0, 1);
         // Bottom
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
+        glTranslatef(-0.5, -1.5, -0.5);
         cores[5]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 0, 1);
         // Bottom Right
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        glTranslatef(0.5, -1.5, -0.5);
         cores[5]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(0, 0, 2);
         // Bottom, Back, Left
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-1.5, -1.5, 0.5);
         cores[5]->br[0]->c[0]->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 0, 2);
         // Bottom, Back
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-0.5, -1.5, 0.5);
         cores[5]->br[0]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 0, 2);
         // Bottom, Back, Right
         if(main_rotator == 0) glRotatef(rotation_opp, 0, 1, 0);
         else if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(0.5, -1.5, 0.5);
         cores[5]->br[0]->c[1]->draw();
         glPopMatrix();
         // Draw the rest
         glPushMatrix();
-        glTranslatef(0, 1, 0);
         // Front, Left
         if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(-1.5, -0.5, -1.5);
         cores[2]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 1, 0);
         // Front
         if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(-0.5, -0.5, -1.5);
         cores[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 1, 0);
         // Front Right
         if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_main, 0, 0, 1);
+        glTranslatef(0.5, -0.5, -1.5);
         cores[2]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(0, 1, 2);
         // Back, Left
         if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-1.5, -0.5, 0.5);
         cores[4]->br[2]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(1, 1, 2);
         // Back
         if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(-0.5, -0.5, 0.5);
         cores[4]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 1, 2);
         // Back Right
         if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
+        glTranslatef(0.5, -0.5, 0.5);
         cores[4]->br[1]->b->draw();
         glPopMatrix();
         // Draw Final 2 cores
         glPushMatrix();
-        glTranslatef(0, 1, 1);
         // Left
         if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
+        glTranslatef(-1.5, -0.5, -0.5);
         cores[3]->b->draw();
         glPopMatrix();
         glPushMatrix();
-        glTranslatef(2, 1, 1);
         // Right
         if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
+        glTranslatef(0.5, -0.5, -0.5);
         cores[1]->b->draw();
         glPopMatrix();
     glColor3f(0,0,0);
@@ -427,14 +429,22 @@ void RubixCube::update_cube(int t){
     // The ms. in the #define variables to theta.
     if(main_rotator != -1){
         // Since i want the rotation to speed up as u add more turns to it.
-        // I am going to use that with the equation total_turn/msec
+        // I am going to use that with the equation msec*(total_turn/turn_speed)
         // This is a good scalar value to then multiply by parameter t
         // Giving us the total theta turned.
-        main_progress += (main_degrees / t);
-        opp_progress += (opp_degrees / t);
+		main_progress += t * (main_degrees / BLOCK_ROTATE_SPEED);
+		opp_progress += t * (opp_degrees / BLOCK_ROTATE_SPEED);
         // We must also check for finished animations because important reason.
-        if(main_progress >= main_degrees) main_progress = main_degrees;
-        if(opp_progress >= opp_degrees) opp_progress == opp_degrees;
+		if ((main_progress >= main_degrees && main_degrees > 0) ||
+			(main_progress <= main_degrees && main_degrees < 0)){
+			main_progress = 0;
+			main_degrees = 0;
+		}
+		if ((opp_progress >= opp_degrees && opp_degrees > 0) ||
+			(opp_progress <= main_degrees && opp_degrees < 0)){
+			opp_degrees = 0;
+			opp_progress = 0;
+		}
         // Are both animations finished? Then the rubix cube should remember that
         // And allow itself to execute a new turn.
         if(main_progress == main_degrees && opp_progress == opp_degrees){
@@ -491,19 +501,10 @@ void RubixCube::turn_side(int s, int d, bool anim){
     // First lets update the cube.
     // Each core has its opposite side and as such we know which sides dont get changed.
     int dir;
-    int i, j;
     bridge *temp;
-    core *t = NULL;
-    core *tfer = NULL;
     Block *temp_block;
-    Color *temp_color;
     if( d < 0) dir = -1;
     else dir = 1;
-    // Possible fix for clockwise problem and cube representations.
-    /*if(s == 1){
-        if(d == -1) d = 1;
-        else d = -1;
-    }*/
     // Lets update the cube's memory
     // We have the core number and its bridges. 
     // With that this will be cake.
@@ -662,6 +663,37 @@ void RubixCube::turn_side(int s, int d, bool anim){
     
     cores[s]->br[1]->b->rotate_block(s, d);
     cores[s]->br[2]->b->rotate_block(s, d);
+
+	// Now that all that nonsense is finished and the memory is updated, lets setup animations.
+	if (anim){
+		// Its very simple, we add/subtract from the opp or main degree variables and set the main rotator to 0, 1, 2.
+		switch (s){
+		case 0:
+			main_rotator = 0;
+			main_degrees += (90 * dir);
+			break;
+		case 1:
+			main_rotator = 1;
+			main_degrees += (90 * dir);
+			break;
+		case 2:
+			main_rotator = 2;
+			main_degrees += (90 * dir);
+			break;
+		case 3:
+			main_rotator = 1;
+			opp_degrees += (90 * dir);
+			break;
+		case 4:
+			main_rotator = 2;
+			opp_degrees += (90 * dir);
+			break;
+		case 5:
+			main_rotator = 0;
+			opp_degrees += (90 * dir);
+			break;
+		}
+	}
     
 }
 
@@ -672,7 +704,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
  * Usually used to initialize a random cube.
  */
 void RubixCube::shuffle_cube(int i){
-    if(i == 1) turn_side(5, 1, false);
+    if(i == 1) turn_side(5, 1, true);
     if(i == 2) turn_side(5, -1, false);
     if(i == 3) turn_side(3, 1, false);
     if(i == 4) turn_side(2, 1, false);

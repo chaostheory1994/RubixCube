@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
 #else
@@ -38,10 +39,14 @@ const int SKIP_TICKS = 1000 / GAME_UPDATE_SPEED;
 
 RubixCube rc;
 time_t next_game_tick;
+time_t next_fps_update;
 float interpolation;
 int loops;
 int thetaX;
 int thetaY;
+int thetaZ;
+int fps;
+int frames;
 
 void myabort(void) {
 	abort();
@@ -109,9 +114,13 @@ void gl_setup(void) {
 
 void my_setup(int argc, char **argv) {
     next_game_tick = time(NULL);
+	next_fps_update = time(NULL);
 	rc.print_debug();
     thetaX = 0;
-	thetaY = 0;
+	thetaY = 0; 
+	thetaZ = 0;
+	frames = 0;
+	fps = 0;
     return;
 }
 
@@ -171,6 +180,9 @@ void my_mouse(int button, int state, int mousex, int mousey) {
 }
 
 void my_display(void) {
+	char fps_string[100];
+	int i;
+	int len;
 	/* clear the buffer */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -186,12 +198,24 @@ void my_display(void) {
         glRotatef(thetaX, 0, 1, 0);
 		glRotatef(thetaY, 1, 0, 0);
         glPushMatrix();
-        glTranslatef(-1.5, -1.5, -1.5);
 	// Setup Interpolation
 	interpolation = (float)(time(NULL)+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
-        rc.draw(interpolation);
-        glPopMatrix();
+    rc.draw(interpolation);
+    glPopMatrix();
+	frames++;
+	if (time(NULL) > next_fps_update){
+		fps = frames / (time(NULL) - next_fps_update);
+		next_fps_update = time(NULL) + 1000;
+	}
+	glPushMatrix();
+	glColor3f(1, 1, 1);
+	glRasterPos2f(-3, -3);
+	_itoa(fps, fps_string, 10);
+	len = strlen(fps_string);
+	for (i = 0; i < len; i++){
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, fps_string[i]);
+	}
 	/* buffer is ready */
 	glutSwapBuffers();
 	
