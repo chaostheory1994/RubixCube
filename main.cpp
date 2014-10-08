@@ -208,7 +208,7 @@ void my_display(void) {
     // Setup an fps counter for performance reasons.
 	frames++;
         // fps will update every second or so.
-        printf("%lld\n", getTickCount());
+        //printf("%lld\n", getTickCount());
         if(getTickCount() > next_fps_update){
             fps = frames / (getTickCount() - next_fps_update);
             next_fps_update = getTickCount() + SKIP_TICKS;

@@ -104,10 +104,10 @@ private:
     core *cores[6];
     // I will also need variables to keep track of rotation.
     int main_rotator;
-    int main_degrees;
-    int main_progress;
-    int opp_degrees;
-    int opp_progress;
+    float main_degrees;
+    float main_progress;
+    float opp_degrees;
+    float opp_progress;
     void setup_color(Color*, float, float, float, int);
     void turn_side(int, int, bool);
 };

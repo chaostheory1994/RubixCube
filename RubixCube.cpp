@@ -441,7 +441,7 @@ void RubixCube::update_cube(int t){
 			main_degrees = 0;
 		}
 		if ((opp_progress >= opp_degrees && opp_degrees > 0) ||
-			(opp_progress <= main_degrees && opp_degrees < 0)){
+			(opp_progress <= opp_degrees && opp_degrees < 0)){
 			opp_degrees = 0;
 			opp_progress = 0;
 		}
@@ -666,6 +666,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
 
 	// Now that all that nonsense is finished and the memory is updated, lets setup animations.
 	if (anim){
+            dir = dir * -1;
 		// Its very simple, we add/subtract from the opp or main degree variables and set the main rotator to 0, 1, 2.
 		switch (s){
 		case 0:
@@ -704,7 +705,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
  * Usually used to initialize a random cube.
  */
 void RubixCube::shuffle_cube(int i){
-    if(i == 1) turn_side(5, 1, true);
+    if(i == 1) turn_side(5, -1, true);
     if(i == 2) turn_side(5, -1, false);
     if(i == 3) turn_side(1, 1, false);
     if(i == 4) turn_side(4, 1, false);
