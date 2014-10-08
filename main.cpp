@@ -8,8 +8,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <cstring>
 #include "main.h"
 #include "RubixCube.h"
+
+#define DEBUG_MESSAGES_RUBIX
 
 #define TRUE  1
 #define FALSE 0
@@ -23,6 +26,7 @@
 #define GAME_UPDATE_SPEED 25 /* in fps, how many times a second the game should update. */
 #define MAX_FRAME_SKIP 5 /* Max number of frames that the program can skip to update game mechanics */
 
+
 void myabort(void);
 void glut_setup(void) ;
 void gl_setup(void) ;
@@ -33,13 +37,14 @@ void my_keyboard(unsigned char key, int x, int y);
 void my_mouse_drag(int x, int y);
 void my_mouse(int button, int state, int mousex, int mousey);
 void my_idle(void);
+unsigned getTickCount();
 
 // Variables.
 const int SKIP_TICKS = 1000 / GAME_UPDATE_SPEED;
 
 RubixCube rc;
-clock_t next_game_tick;
-clock_t next_fps_update;
+unsigned long long next_game_tick;
+unsigned long long next_fps_update;
 float interpolation;
 int loops;
 int thetaX;
@@ -113,9 +118,9 @@ void gl_setup(void) {
 }
 
 void my_setup(int argc, char **argv) {
-    next_game_tick = clock();
-	next_fps_update = clock();
-	rc.print_debug();
+    next_game_tick = getTickCount();
+    next_fps_update = getTickCount();
+    rc.print_debug();
     thetaX = 0;
 	thetaY = 0; 
 	thetaZ = 0;
@@ -174,9 +179,6 @@ void my_mouse_drag(int x, int y) {
  that is, (0,0) is at the upper left corner
  */
 void my_mouse(int button, int state, int mousex, int mousey) {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-		
-	}
 }
 
 void my_display(void) {
@@ -199,20 +201,31 @@ void my_display(void) {
 		glRotatef(thetaY, 1, 0, 0);
         glPushMatrix();
 	// Setup Interpolation
-	interpolation = (float)(clock()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
+        interpolation = (float)(getTickCount()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
     rc.draw(interpolation, SKIP_TICKS);
     glPopMatrix();
+    // Setup an fps counter for performance reasons.
 	frames++;
-	if (clock() > next_fps_update){
-		fps = frames / (clock() - next_fps_update);
-		next_fps_update = clock() + 1000;
-		puts("fps Updated!");
-	}
+        // fps will update every second or so.
+        printf("%lld\n", getTickCount());
+        if(getTickCount() > next_fps_update){
+            fps = frames / (getTickCount() - next_fps_update);
+            next_fps_update = getTickCount() + SKIP_TICKS;
+#ifdef DEBUG_MESSAGES_RUBX
+            puts("fps Updated!");
+#endif
+        }
+        // Display the fps
 	glPushMatrix();
 	glColor3f(1, 1, 1);
 	glRasterPos2f(-3, -3);
+        // Windows has itoa depricated.
+#ifdef _WIN32
 	_itoa(fps, fps_string, 10);
+#elif __linux__
+        sprintf(fps_string, "%d", fps);
+#endif
 	len = strlen(fps_string);
 	for (i = 0; i < len; i++){
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, fps_string[i]);
@@ -226,7 +239,7 @@ void my_display(void) {
 
 void my_idle(void) {
     loops = 0;
-    while(clock() > next_game_tick && loops < MAX_FRAME_SKIP){
+    while(getTickCount() > next_game_tick && loops < MAX_FRAME_SKIP){
         // Update Game Stuff
         rc.update_cube(SKIP_TICKS);
         
@@ -238,4 +251,12 @@ void my_idle(void) {
     // Display Screen
     my_display();
     return ;
+}
+
+unsigned getTickCount(){
+    timespec ts;
+    if(clock_gettime(CLOCK_REALTIME, &ts)){
+        return 0;
+    }
+    return ((long long)ts.tv_sec * 1000) + (ts.tv_nsec / 1000000);
 }
