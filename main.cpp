@@ -38,8 +38,8 @@ void my_idle(void);
 const int SKIP_TICKS = 1000 / GAME_UPDATE_SPEED;
 
 RubixCube rc;
-time_t next_game_tick;
-time_t next_fps_update;
+clock_t next_game_tick;
+clock_t next_fps_update;
 float interpolation;
 int loops;
 int thetaX;
@@ -113,8 +113,8 @@ void gl_setup(void) {
 }
 
 void my_setup(int argc, char **argv) {
-    next_game_tick = time(NULL);
-	next_fps_update = time(NULL);
+    next_game_tick = clock();
+	next_fps_update = clock();
 	rc.print_debug();
     thetaX = 0;
 	thetaY = 0; 
@@ -199,14 +199,15 @@ void my_display(void) {
 		glRotatef(thetaY, 1, 0, 0);
         glPushMatrix();
 	// Setup Interpolation
-	interpolation = (float)(time(NULL)+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
+	interpolation = (float)(clock()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
-    rc.draw(interpolation);
+    rc.draw(interpolation, SKIP_TICKS);
     glPopMatrix();
 	frames++;
-	if (time(NULL) > next_fps_update){
-		fps = frames / (time(NULL) - next_fps_update);
-		next_fps_update = time(NULL) + 1000;
+	if (clock() > next_fps_update){
+		fps = frames / (clock() - next_fps_update);
+		next_fps_update = clock() + 1000;
+		puts("fps Updated!");
 	}
 	glPushMatrix();
 	glColor3f(1, 1, 1);
@@ -225,7 +226,7 @@ void my_display(void) {
 
 void my_idle(void) {
     loops = 0;
-    while(time(NULL) > next_game_tick && loops < MAX_FRAME_SKIP){
+    while(clock() > next_game_tick && loops < MAX_FRAME_SKIP){
         // Update Game Stuff
         rc.update_cube(SKIP_TICKS);
         

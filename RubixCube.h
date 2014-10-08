@@ -32,7 +32,7 @@
 #define UNDER 5
 
 // Rotation Speed
-#define BLOCK_ROTATE_SPEED 100 /* msec to take for a row/col to turn 90 degrees */
+#define BLOCK_ROTATE_SPEED 5000 /* msec to take for a row/col to turn 90 degrees */
 
 
 using std::queue;
@@ -51,7 +51,7 @@ public:
     RubixCube();
     RubixCube(const RubixCube& orig);
     virtual ~RubixCube();
-    void draw(float);
+    void draw(float, int);
     int push_turn(int, int);
     void update_cube(int);
     void solve_cube();

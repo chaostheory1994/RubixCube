@@ -131,8 +131,8 @@ RubixCube::RubixCube() {
     cores[2]->br[3] = cores[5]->br[3];
     // Back Side
     cores[4]->br[0] = cores[0]->br[0];
-    cores[4]->br[1] = cores[1]->br[1];
-    cores[4]->br[2] = cores[3]->br[1];
+    cores[4]->br[1] = cores[3]->br[1];
+    cores[4]->br[2] = cores[1]->br[1];
     cores[4]->br[3] = cores[5]->br[0];
     //for(i = 0; i < 4; i++) cores[4]->br[i]->b->change_side_color(4, colors[4]);
     // Now  lets color those in.
@@ -184,10 +184,10 @@ void RubixCube::setup_color(Color *c, float r, float g, float b, int id){
  * Will mainly just transform and call draw to all the blocks.
  * If an animation is applied, that will also be included in the transform.
  */
-void RubixCube::draw(float f){
+void RubixCube::draw(float f, int t){
     int i;
-    int rotation_main = main_degrees - (main_progress + (main_degrees * f));
-    int rotation_opp = opp_degrees - (opp_progress + (opp_degrees * f));
+    int rotation_main = main_degrees - (main_progress + (f * t * ((float)main_degrees/(float)BLOCK_ROTATE_SPEED)));
+	int rotation_opp = opp_degrees - (opp_progress + (f * t * ((float) opp_degrees / (float) BLOCK_ROTATE_SPEED)));
     // This is where we draw a cube! Yay!
     // Since we assume we've been translated to the lower left corner of the cube.
     // We can just start to draw.
@@ -358,7 +358,7 @@ void RubixCube::draw(float f){
         if(main_rotator == 1) glRotatef(rotation_opp, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         glTranslatef(-1.5, -0.5, 0.5);
-        cores[4]->br[2]->b->draw();
+        cores[4]->br[1]->b->draw();
         glPopMatrix();
         glPushMatrix();
         // Back
@@ -371,7 +371,7 @@ void RubixCube::draw(float f){
         if(main_rotator == 1) glRotatef(rotation_main, 1, 0, 0);
         else if(main_rotator == 2) glRotatef(rotation_opp, 0, 0, 1);
         glTranslatef(0.5, -0.5, 0.5);
-        cores[4]->br[1]->b->draw();
+        cores[4]->br[2]->b->draw();
         glPopMatrix();
         // Draw Final 2 cores
         glPushMatrix();
@@ -432,8 +432,8 @@ void RubixCube::update_cube(int t){
         // I am going to use that with the equation msec*(total_turn/turn_speed)
         // This is a good scalar value to then multiply by parameter t
         // Giving us the total theta turned.
-		main_progress += t * (main_degrees / BLOCK_ROTATE_SPEED);
-		opp_progress += t * (opp_degrees / BLOCK_ROTATE_SPEED);
+		main_progress += t * ((float)main_degrees / (float)BLOCK_ROTATE_SPEED);
+		opp_progress += t * ((float)opp_degrees / (float)BLOCK_ROTATE_SPEED);
         // We must also check for finished animations because important reason.
 		if ((main_progress >= main_degrees && main_degrees > 0) ||
 			(main_progress <= main_degrees && main_degrees < 0)){
@@ -597,7 +597,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
 		cores[4]->br[2] = cores[1]->br[1];
 
 		// Updating Front and Right
-		cores[2]->br[2] = cores[1]->br[1];
+		cores[2]->br[2] = cores[1]->br[2];
 		
 		// Updating Bottom and Right
 		cores[5]->br[2] = cores[1]->br[3];
@@ -612,7 +612,7 @@ void RubixCube::turn_side(int s, int d, bool anim){
 
 		cores[4]->br[1] = cores[3]->br[1];
 
-		cores[2]->br[1] = cores[3]->br[1];
+		cores[2]->br[1] = cores[3]->br[2];
 
 		cores[5]->br[1] = cores[3]->br[3];
 		cores[5]->br[0]->c[0] = cores[3]->br[3]->c[0];
@@ -706,8 +706,8 @@ void RubixCube::turn_side(int s, int d, bool anim){
 void RubixCube::shuffle_cube(int i){
     if(i == 1) turn_side(5, 1, true);
     if(i == 2) turn_side(5, -1, false);
-    if(i == 3) turn_side(3, 1, false);
-    if(i == 4) turn_side(2, 1, false);
+    if(i == 3) turn_side(1, 1, false);
+    if(i == 4) turn_side(4, 1, false);
 	print_debug();
 }
 
