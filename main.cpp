@@ -139,6 +139,7 @@ void my_setup(int argc, char **argv) {
 	if (argc > 1){
 		shuffle_count = atoi(argv[1]);
 	}
+	else shuffle_count = -1;
     return;
 }
 
