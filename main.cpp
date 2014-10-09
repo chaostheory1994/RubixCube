@@ -9,10 +9,13 @@
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
+#ifdef _WIN32
+#include <WinBase.h>
+#endif
 #include "main.h"
 #include "RubixCube.h"
 
-#define DEBUG_MESSAGES_RUBIX
+//#define DEBUG_MESSAGES_RUBIX
 
 #define TRUE  1
 #define FALSE 0
@@ -37,7 +40,9 @@ void my_keyboard(unsigned char key, int x, int y);
 void my_mouse_drag(int x, int y);
 void my_mouse(int button, int state, int mousex, int mousey);
 void my_idle(void);
-unsigned getTickCount();
+#ifdef __linux__
+unsigned GetTickCount();
+#endif
 
 // Variables.
 const int SKIP_TICKS = 1000 / GAME_UPDATE_SPEED;
@@ -52,8 +57,10 @@ int thetaY;
 int thetaZ;
 int fps;
 int frames;
+int shuffle_count;
 
 void myabort(void) {
+	// This is where we will cleanup the game and such.
 	abort();
 	exit(1); /* exit so g++ knows we don't return. */
 } 
@@ -118,14 +125,20 @@ void gl_setup(void) {
 }
 
 void my_setup(int argc, char **argv) {
-    next_game_tick = getTickCount();
-    next_fps_update = getTickCount();
+    next_game_tick = GetTickCount();
+    next_fps_update = GetTickCount();
+#ifdef DEBUG_MESSAGES_RUBIX
     rc.print_debug();
+#endif
     thetaX = 0;
 	thetaY = 0; 
 	thetaZ = 0;
 	frames = 0;
 	fps = 0;
+	// Check for arguement.
+	if (argc > 1){
+		shuffle_count = atoi(argv[1]);
+	}
     return;
 }
 
@@ -141,25 +154,72 @@ void my_reshape(int w, int h) {
 void my_keyboard( unsigned char key, int x, int y ) {
 	
 	switch( key ) {
-		case 'x':
+		// Rotate Camera Keys
+		case 'h':
+			thetaX--;
+			break;
+		case 'H':
 			thetaX++;
 			break;
-		case 'y':
+		case 'j':
 			thetaY++;
 			break;
-            case 't':
-                rc.shuffle_cube(1);
-                break;
-            case 'r':
-                rc.shuffle_cube(2);
-                break;
-            case 'e':
-                rc.shuffle_cube(3);
-				rc.print_debug();
-                break;
-            case 'w':
-                rc.shuffle_cube(4);
-                break;
+		case 'J':
+			thetaY--;
+			break;
+		case 'k':
+			thetaZ--;
+			break;
+		case 'K':
+			thetaZ++;
+			break;
+		case 'r':
+			rc.push_turn(2, 1);
+			break;
+		case 'R':
+			rc.push_turn(2, -1);
+			break;
+		case 'w':
+			rc.push_turn(0, 1);
+			break;
+		case 'W':
+			rc.push_turn(0, -1);
+			break;
+		case 'b':
+			rc.push_turn(1, 1);
+			break;
+		case 'B':
+			rc.push_turn(1, -1);
+			break;
+		case 'g':
+			rc.push_turn(3, 1);
+			break;
+		case 'G':
+			rc.push_turn(3, -1);
+			break;
+		case 'y':
+			rc.push_turn(5, 1);
+			break;
+		case 'Y':
+			rc.push_turn(5, -1);
+			break;
+		case 'o':
+			rc.push_turn(4, 1);
+			break;
+		case 'O':
+			rc.push_turn(4, -1);
+			break;
+		case 'n':
+			rc.reset_cube(-1);
+			break;
+		case 'N':
+			thetaX = 0;
+			thetaY = 0;
+			thetaZ = 0;
+			break;
+		case 'a':
+			rc.push_turn(-1, 0);
+			break;
 		case 'q': 
 		case 'Q':
 			exit(0) ;
@@ -192,27 +252,28 @@ void my_display(void) {
         
         glMatrixMode(GL_MODELVIEW) ;
         glLoadIdentity();
-        gluLookAt(0.0, 5.0, 15.0,  // x,y,z coord of the camera 
+        gluLookAt(0.0, 5.0, -15.0,  // x,y,z coord of the camera 
 	    0.0, 0.0, 0.0,  // x,y,z coord of the origin
 	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)
 	
         // Setup placement of the Rubix Cube. Will be located at -1.5, -1.5
-        glRotatef(thetaX, 0, 1, 0);
-		glRotatef(thetaY, 1, 0, 0);
+		glRotatef(thetaZ, 0, 0, 1);
+        glRotatef(thetaY, 0, 1, 0);
+		glRotatef(thetaX, 1, 0, 0);
         glPushMatrix();
 	// Setup Interpolation
-        interpolation = (float)(getTickCount()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
+        interpolation = (float)(GetTickCount()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
     rc.draw(interpolation, SKIP_TICKS);
     glPopMatrix();
     // Setup an fps counter for performance reasons.
 	frames++;
         // fps will update every second or so.
-        //printf("%lld\n", getTickCount());
-        if(getTickCount() > next_fps_update){
-            fps = frames / (getTickCount() - next_fps_update);
-            next_fps_update = getTickCount() + SKIP_TICKS;
-#ifdef DEBUG_MESSAGES_RUBX
+        //printf("%lld\n", GetTickCount());
+        if(GetTickCount() > next_fps_update){
+            fps = frames / (GetTickCount() - next_fps_update);
+            next_fps_update = GetTickCount() + SKIP_TICKS;
+#ifdef DEBUG_MESSAGES_RUBIX
             puts("fps Updated!");
 #endif
         }
@@ -239,7 +300,7 @@ void my_display(void) {
 
 void my_idle(void) {
     loops = 0;
-    while(getTickCount() > next_game_tick && loops < MAX_FRAME_SKIP){
+    while(GetTickCount() > next_game_tick && loops < MAX_FRAME_SKIP){
         // Update Game Stuff
         rc.update_cube(SKIP_TICKS);
         
@@ -252,11 +313,13 @@ void my_idle(void) {
     my_display();
     return ;
 }
-
-unsigned getTickCount(){
+// Windows already has a valid GetTickCount(). This implamentation wouldnt work on windows anyway.
+#ifdef __linux__
+unsigned GetTickCount(){
     timespec ts;
     if(clock_gettime(CLOCK_REALTIME, &ts)){
         return 0;
     }
     return ((long long)ts.tv_sec * 1000) + (ts.tv_nsec / 1000000);
 }
+#endif

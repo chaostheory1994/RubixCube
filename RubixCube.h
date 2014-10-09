@@ -15,9 +15,9 @@
 
 // Default colors, unless overriden by user.
 #define R_COLOR0 1,1,1 // White
-#define R_COLOR1 0,0,1 // Blue
+#define R_COLOR1 0,1,0 // Green
 #define R_COLOR2 1,0,0 // Red
-#define R_COLOR3 0,1,0 // Green
+#define R_COLOR3 0,0,1 // Blue
 #define R_COLOR4 1,0.5,0 // Orange
 #define R_COLOR5 1,1,0 // Yellow
 #define R_COLOR_HIDDEN 0.33, 0.33, 0.33 /* Default is Grey */
@@ -30,6 +30,8 @@
 #define LEFT 3
 #define BACK 4
 #define UNDER 5
+
+#define DEFAULT_SHUFFLE 5
 
 // Rotation Speed
 #define BLOCK_ROTATE_SPEED 5000 /* msec to take for a row/col to turn 90 degrees */
@@ -54,7 +56,7 @@ public:
     void draw(float, int);
     int push_turn(int, int);
     void update_cube(int);
-    void solve_cube();
+	void reset_cube(int);
     void print_debug();
     void shuffle_cube(int);
 	bool check_integrity();
@@ -108,8 +110,11 @@ private:
     float main_progress;
     float opp_degrees;
     float opp_progress;
+	// A variable for when the cube is being solved.
+	bool solving;
     void setup_color(Color*, float, float, float, int);
     void turn_side(int, int, bool);
+	bool is_complete();
 };
 
 #endif	/* RUBIXCUBE_H */

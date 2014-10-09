@@ -12,6 +12,7 @@
 #include <stack>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 #include "main.h"
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
@@ -156,6 +157,10 @@ RubixCube::RubixCube() {
     cores[3]->opp = 1;
     cores[2]->opp = 4;
     cores[4]->opp = 2;
+
+	// THE ABSOLUTE MOST IMPORTANT STEP!!!!!!!
+	// Seed that rng
+	srand(time(NULL));
     
     // Jobs Done!
 }
@@ -391,12 +396,17 @@ void RubixCube::draw(float f, int t){
 
 /* This is called when we want to turn a side.
  * Will mainly be called when input is read.
+ * if -1 is the number of the side, this is a special case where the cube will begin to use solve the cube over the event queue.
  * int s: the side that will turn. Represented by side preprocessor variables.
  * int d: the direction clockwise or counterclockwise >=0 is clockwise. else counter clockwise.
  */
 int RubixCube::push_turn(int s, int d){
     // This is a simple method that adds the event to the event queue.
+	// If the cube is solving, we will disallow user input to the event queue.
+	// This will prevent a false log stack to be held.
     queue_packet *qp = new queue_packet;
+	qp->side = s;
+	qp->direction = d;
     q.push(qp);
     return 1;
     // There all done.
@@ -410,21 +420,51 @@ void RubixCube::update_cube(int t){
     queue_packet* temp;
     // This is where all the heavy duty stuff happens.
     // First lets update rotation.
+	// We much check if the cube is solving in which case we prioritize the log stack over the queue.
     // We must check the queue to see if we must add to the total rotation
     while(true){
-        if(q.empty()) break;
-        temp = q.front();
-        if(temp->side == main_rotator ||
-                temp->side == cores[main_rotator]->opp){
-            // Oh hey, we have a viable addition to our movement.
-            // Lets execute it.
-            turn_side(temp->side, temp->direction, true);
-            // Before we pop, lets add it to the log.
-            log.push(temp);
-            q.pop();
-        }
-        else break;
+		// Is the cube prioritizing the log?
+		if (solving){
+			// Did we empty the log already?
+			if (log.empty()){
+				solving = false;
+				break;
+			}
+			temp = log.top();
+			// is temp a viable turn to start?
+			if (temp->side == main_rotator ||
+				temp->side == cores[main_rotator]->opp ||
+				main_rotator == -1){
+				// Lets tell the cube to setup the turn.
+				turn_side(temp->side, temp->direction, true);
+				// Now we rid oursevles of this packet.
+				log.pop();
+				delete temp;
+			}
+		}
+		else{
+			if (q.empty()) break;
+			temp = q.front();
+			// Special case where the user wanted the cube solved!
+			if (temp->side == -1){
+				solving = true;
+				q.pop();
+				delete temp;
+			}
+			else if (temp->side == main_rotator ||
+				temp->side == cores[main_rotator]->opp ||
+				main_rotator == -1){
+				// Oh hey, we have a viable addition to our movement.
+				// Lets execute it.
+				turn_side(temp->side, temp->direction, true);
+				// Before we pop, lets add it to the log.
+				log.push(temp);
+				q.pop();
+			}
+			else break;
+		}
     }
+	// Let check if we need to undo the solving boolean
     // We know that the time t has passed which will allow us to convert
     // The ms. in the #define variables to theta.
     if(main_rotator != -1){
@@ -432,6 +472,9 @@ void RubixCube::update_cube(int t){
         // I am going to use that with the equation msec*(total_turn/turn_speed)
         // This is a good scalar value to then multiply by parameter t
         // Giving us the total theta turned.
+		// There is a special case where the user moves one way and moves the other.
+		// main/opp_degrees will be zero and as such will not move.
+
 		main_progress += t * ((float)main_degrees / (float)BLOCK_ROTATE_SPEED);
 		opp_progress += t * ((float)opp_degrees / (float)BLOCK_ROTATE_SPEED);
         // We must also check for finished animations because important reason.
@@ -454,16 +497,56 @@ void RubixCube::update_cube(int t){
             opp_progress = 0;
             main_rotator = -1;
         }
+
+		// Finally lets check for a completed cube.
+		// If the cube is back to normal we simply clear the all the queue_packets and say hey look a new cube, or is it?
+		if (is_complete()){
+			// First empty the event queue.
+			while (!q.empty()){
+				temp = q.front();
+				q.pop();
+				delete temp;
+			}
+			// Now for the event log.
+			while (!log.empty()){
+				temp = log.top();
+				log.pop();
+				delete temp;
+			}
+		}
         // That is pretty much it for this method.
     }
 }
 
-/* This function will simply solve the rubix cube for the user.
- * It will mainly empty the event queue.
- * Then it will add all the events on the stack to the queue.
+/* This method is simple enough.
+ * We simply kill all animation.
+ * Then we empty event queue and instantly solve the cube.
+ * And finally shuffle the cube using the parameter n
  */
-void RubixCube::solve_cube(){
-    
+void RubixCube::reset_cube(int n){
+	queue_packet *temp;
+	// Kill animation
+	main_rotator = -1;
+	main_degrees = 0;
+	main_progress = 0;
+	opp_degrees = 0;
+	opp_degrees = 0;
+	// Empty event queue
+	while (!q.empty()){
+		temp = q.front();
+		q.pop();
+		delete temp;
+	}
+	// Solve the cube
+	while (!log.empty()){
+		temp = log.top();
+		log.pop();
+		turn_side(temp->side, temp->direction*-1, false);
+		delete temp;
+	}
+	// Shuffle the cube
+	shuffle_cube(n);
+	
 }
 
 void RubixCube::print_debug(){
@@ -666,33 +749,78 @@ void RubixCube::turn_side(int s, int d, bool anim){
 
 	// Now that all that nonsense is finished and the memory is updated, lets setup animations.
 	if (anim){
-            dir = dir * -1;
 		// Its very simple, we add/subtract from the opp or main degree variables and set the main rotator to 0, 1, 2.
+		// Also cores 0 and 5 rotate the opposite direction than described so they need to be switched.
+		// In each there will be a special case where main/opp_degrees will be made into something bad compared to their progress
+		// As such there needs to be a check for that and if it happens we will mutate the degrees/progress accordingly.
 		switch (s){
 		case 0:
+			dir = dir * -1;
 			main_rotator = 0;
 			main_degrees += (90 * dir);
+			/*if (main_degrees == 0){
+				main_degrees += (90 * dir);
+				main_progress += (90 * dir);
+			}*/
 			break;
 		case 1:
 			main_rotator = 1;
 			main_degrees += (90 * dir);
+			/*if (main_degrees == 0){
+				main_degrees += (90 * dir);
+				main_progress += (90 * dir);
+			}*/
 			break;
 		case 2:
 			main_rotator = 2;
 			main_degrees += (90 * dir);
+			/*if (main_degrees == 0){
+				main_degrees += (90 * dir);
+				main_progress += (90 * dir);
+			}*/
 			break;
 		case 3:
 			main_rotator = 1;
 			opp_degrees += (90 * dir);
+			/*if (opp_degrees == 0){
+				opp_degrees += (90 * dir);
+				opp_progress += (90 * dir);
+			}*/
 			break;
 		case 4:
 			main_rotator = 2;
 			opp_degrees += (90 * dir);
+			/*if (opp_degrees == 0){
+				opp_degrees += (90 * dir);
+				opp_progress += (90 * dir);
+			}*/
 			break;
 		case 5:
+			dir = dir * -1;
 			main_rotator = 0;
 			opp_degrees += (90 * dir);
+			/*if (opp_degrees == 0){
+				opp_degrees += (90 * dir);
+				opp_progress += (90 * dir);
+			}*/
 			break;
+		}
+		// This is the check for the special case described above.
+		if (abs(main_degrees) < abs(main_progress)){
+			while (abs(main_degrees) - 90 >= 0){
+				main_degrees += (90 * dir);
+				main_progress += (90 * dir);
+			}
+			main_degrees += (90 * dir);
+			main_progress += (90 * dir);
+		}
+		if (abs(opp_degrees) < abs(opp_progress)){
+			while (abs(opp_degrees) - 90 >= 0){
+				opp_degrees += (90 * dir);
+				opp_progress += (90 * dir);
+			}
+			opp_degrees += (90 * dir);
+			opp_progress += (90 * dir);
 		}
 	}
     
@@ -704,12 +832,30 @@ void RubixCube::turn_side(int s, int d, bool anim){
  * This way the user cant see it shuffle.
  * Usually used to initialize a random cube.
  */
-void RubixCube::shuffle_cube(int i){
-    if(i == 1) turn_side(5, -1, true);
-    if(i == 2) turn_side(5, -1, false);
-    if(i == 3) turn_side(1, 1, false);
-    if(i == 4) turn_side(4, 1, false);
-	print_debug();
+void RubixCube::shuffle_cube(int n){
+	int i;
+	int t;
+	queue_packet *qp;
+	if (n <= 0) n = DEFAULT_SHUFFLE;
+	for (i = 0; i < n; i++){
+		// First we create a new queue packet.
+		qp = new queue_packet;
+		// Lets do some randomness.
+		// Random Side between 0 to 5
+		qp->side = rand() % 6;
+		// Random number 1 or 2;
+		t = rand() % 2 + 1;
+		if (t == 1) qp->direction = -1;
+		else qp->direction = 1;
+		
+		// With the packet created we can execute with turn side.
+		// We pass false into the anim paraemter to just instantly turn the cube.
+		turn_side(qp->side, qp->direction, false);
+
+		// Finally we add the packet to the log stack.
+		log.push(qp);
+	}
+	
 }
 
 bool RubixCube::check_integrity(){
