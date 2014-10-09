@@ -258,16 +258,20 @@ void my_display(void) {
 	    0.0, 1.0, 0.0); // the direction of up (default is y-axis)
 	
         // Setup placement of the Rubix Cube. Will be located at -1.5, -1.5
-		glRotatef(thetaZ, 0, 0, 1);
+	glRotatef(thetaZ, 0, 0, 1);
         glRotatef(thetaY, 0, 1, 0);
-		glRotatef(thetaX, 1, 0, 0);
+	glRotatef(thetaX, 1, 0, 0);
+        // For some reason that i cant find out, the X axis is reversed making
+        // The right side display on the left and the left on the right.
+        // As a result we are going to just mirror it.
+        glScalef(-1, 1, 1);
         glPushMatrix();
 	// Setup Interpolation
         interpolation = (float)(GetTickCount()+SKIP_TICKS-next_game_tick) / (float)(SKIP_TICKS);
 	// Draw Cube
-    rc.draw(interpolation, SKIP_TICKS);
-    glPopMatrix();
-    // Setup an fps counter for performance reasons.
+        rc.draw(interpolation, SKIP_TICKS);
+        glPopMatrix();
+        // Setup an fps counter for performance reasons.
 	frames++;
         // fps will update every second or so.
         //printf("%lld\n", GetTickCount());

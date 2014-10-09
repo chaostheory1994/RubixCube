@@ -1,4 +1,30 @@
 Name: Jacob Schreiner
 Platform: Ubuntu 14.04 (3.13.0-35-generic)
+Checklist:
+The Rubix Cube does infact implaments all of the possible commands.
+The Rubix Cube does display correctly in a 3d space.
+The user is able to rotate around any of the CUBE's axis.
+The user is able to rotate any of the sides in either direction.
+I also allowed for customization with preprocessor variables.
+	These variables include turn speed and colors of each side.
+The cube does implament an autosolve feature.
+The user turns and autosolve all animate correctly in both directions.
+The user can enter multiple commands and the rubix cube will execute in order when able.
+The auto solve feature will take precident over any new animations/turns past the current animation.
+The user can provide an arguement of an int that will tell the cube how may turns to shuffle the cube.
+If the user does not provide an arguement, the cube will use its default (Which is also a preprocessor variable).
+The user is able to instantly start a new game with a shuffled cube of the same value as the original shuffle.
+Design Decisions:
+There were two major decision that may set my project apart from others.
+As a way to avoid seaming similar implamentations that may exist, I tried to represent my cube in an original way that I had created. Each block has its own class and the cube creates 26 of them, however the cube stores them in structs that create 3 layers to the cube, The core layer, the bridge layer, and the corner layer. The corner layer is the easiest to understand, it is merely just a block in memory and it is representing the corners of the rubix cube. The cores are the blocks in the center of each side. Since they do not move, the perfectly take the position of referencing each side. They are merely a block in memory and 4 pointers to bridges as well as an opposite int to represent its opposite side for implamentation purposes. The bridges are what link the corners to the core. They merely point to two blocks which are the 2 corners its next to. It is pretty much represented as:
+c b c
+b o b
+c b c
+where c is a corner b is a bridge and o is a core.
+It was a pain in the balls to manage at times, but it works and I believe its original so i like it.
+
+The other implamentation decision was how to handle the commands given by the user. I merely create a struct of 2 ints, its side and its direction which i then insert into a queue. Then when the next event in the queue is eligable to execute, I pop it and then push it onto a stack which i call a log. The log is the main mechanism to solving the cube. However, when the poping front the log, the packets are then deleted.
 Problems: 
+There were a few problems that occured during the process. Mainly issues with linux and windows being different in the GetTickCount(). This function is only available on windows so i tried to find alternatives. 
 Citations:
+http://www.koonsolo.com/news/dewitters-gameloop/

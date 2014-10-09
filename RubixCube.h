@@ -15,9 +15,9 @@
 
 // Default colors, unless overriden by user.
 #define R_COLOR0 1,1,1 // White
-#define R_COLOR1 0,1,0 // Green
+#define R_COLOR1 0,0,1 // Blue
 #define R_COLOR2 1,0,0 // Red
-#define R_COLOR3 0,0,1 // Blue
+#define R_COLOR3 0,1,0 // Green
 #define R_COLOR4 1,0.5,0 // Orange
 #define R_COLOR5 1,1,0 // Yellow
 #define R_COLOR_HIDDEN 0.33, 0.33, 0.33 /* Default is Grey */

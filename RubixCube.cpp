@@ -436,31 +436,36 @@ void RubixCube::update_cube(int t){
 				temp->side == cores[main_rotator]->opp ||
 				main_rotator == -1){
 				// Lets tell the cube to setup the turn.
-				turn_side(temp->side, temp->direction, true);
+				turn_side(temp->side, temp->direction * -1, true);
 				// Now we rid oursevles of this packet.
 				log.pop();
 				delete temp;
 			}
+                        else break;
 		}
 		else{
 			if (q.empty()) break;
 			temp = q.front();
-			// Special case where the user wanted the cube solved!
-			if (temp->side == -1){
-				solving = true;
-				q.pop();
-				delete temp;
-			}
-			else if (temp->side == main_rotator ||
+                        // Even if the user wanted to solve the cube,
+                        // It should wait until the animation has finished before it is started.
+			if (temp->side == main_rotator ||
 				temp->side == cores[main_rotator]->opp ||
 				main_rotator == -1){
-				// Oh hey, we have a viable addition to our movement.
-				// Lets execute it.
-				turn_side(temp->side, temp->direction, true);
-				// Before we pop, lets add it to the log.
-				log.push(temp);
-				q.pop();
-			}
+                                // Special case where the user wanted the cube solved!
+                                 if (temp->side == -1){
+                                    solving = true;
+                                    q.pop();
+                                    delete temp;
+                                }
+                                else{
+                                    // Oh hey, we have a viable addition to our movement.
+                                    // Lets execute it.
+                                    turn_side(temp->side, temp->direction, true);
+                                    // Before we pop, lets add it to the log.
+                                    log.push(temp);
+                                    q.pop();
+                                }
+                        }
 			else break;
 		}
     }
@@ -498,22 +503,6 @@ void RubixCube::update_cube(int t){
             main_rotator = -1;
         }
 
-		// Finally lets check for a completed cube.
-		// If the cube is back to normal we simply clear the all the queue_packets and say hey look a new cube, or is it?
-		if (is_complete()){
-			// First empty the event queue.
-			while (!q.empty()){
-				temp = q.front();
-				q.pop();
-				delete temp;
-			}
-			// Now for the event log.
-			while (!log.empty()){
-				temp = log.top();
-				log.pop();
-				delete temp;
-			}
-		}
         // That is pretty much it for this method.
     }
 }
@@ -875,4 +864,23 @@ bool RubixCube::check_integrity(){
 		cores[5]->br[1] == cores[3]->br[3] &&
 		cores[5]->br[2] == cores[1]->br[3] &&
 		cores[5]->br[3] == cores[2]->br[3]);
+}
+
+/* A private function that will iterate through all the sides
+ * It will check if all the bridges and corners match up with the core.
+ */
+bool RubixCube::is_complete(){
+    int i, j, k;
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 4; j++){
+            for(k = 0; k < 2; k++){
+                // Does the corner color id match the core color id?
+                if(cores[i]->br[j]->c[k]->get_color(i)->id != cores[i]->b->get_color(i)->id) return false;
+            }
+            // Does the bridge color id match the core color id?
+            if(cores[i]->br[j]->b->get_color(i)->id != cores[i]->b->get_color(i)->id) return false;
+        }
+    }
+    // If it gets to this point, all the colors match their core on their respective side.
+    return true;
 }
