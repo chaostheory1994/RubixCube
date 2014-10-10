@@ -24,7 +24,40 @@ where c is a corner b is a bridge and o is a core.
 It was a pain in the balls to manage at times, but it works and I believe its original so i like it.
 
 The other implamentation decision was how to handle the commands given by the user. I merely create a struct of 2 ints, its side and its direction which i then insert into a queue. Then when the next event in the queue is eligable to execute, I pop it and then push it onto a stack which i call a log. The log is the main mechanism to solving the cube. However, when the poping front the log, the packets are then deleted.
+
 Problems: 
-There were a few problems that occured during the process. Mainly issues with linux and windows being different in the GetTickCount(). This function is only available on windows so i tried to find alternatives. 
+There were a few problems that occured during the process. Mainly issues with linux and windows being different in the GetTickCount(). This function is only available on windows so i tried to find alternatives. I'm also sorry for how complex my cube is represented, just wanted to do something different.
+
+Test Cases:
+I tested if the user hits 1 way then immediately hits the opposite way, if the side would smoothly go the other way to where it came.
+I tested what would happen if u turn a side very far and let it turn then turn it the opposite way making the desired total rotation less than the current rotation.
+I have a special case on these in the turn_side method, it is marked by a comment.
+I tested if the user reset the cube for a new game while an animation was playing, would the animations of the new game still work properly.
+Similar to above except also check if the solve would work properly.
+I tested what would happen if you hit a bunch of sides and then hit solve and then hit more sides.
+I tested what would happen if you just hit a bunch of side.
+
 Citations:
+The skeleton of the main method came from homework 0's glhello.c
+The additions for making it into 3d perspective came from the sample code for perspective 3d cube. I forget the name of the source code but its the professor's.
+The structure of the game loop and idea for interpolation came from this interesting article:
 http://www.koonsolo.com/news/dewitters-gameloop/
+The recreation of GetTickCount() for linux came from:
+http://www.doctort.org/adam/nerd-notes/linux-equivalent-of-the-windows-gettickcount-function.html
+I did however change the struct used and the method to fill the struct.
+Finally, I used some code to help add an fps counter to the screen. 
+While, the fps counter used to work, im not sure how well it does since the switch to GetTickCount();
+http://stackoverflow.com/questions/2183270/what-is-the-easiest-way-to-print-text-to-screen-in-opengl
+Anything else came either from man pages or c++ reference sites.
+All changes to my code can be found here:
+https://github.com/chaostheory1994/RubixCube/commits/master
+
+Bonuses:
+Im not sure if these would warrant bonus points, but they are slightly extra features.
+The user has the ability to turn a side and the opposite side simultaneously, simply by adding both sides in the queue after one another.
+However, if the opposite sides are split up between a non opposite side, the latter side will obviously have to wait its turn.
+Also, I made it possible to add to a total turn of a side by pressing the button multiple times. This means you could turn the top then bottom then top and the top would register to turn a total of 180 from its original position.
+And because some turns could take a long time if large enough, i scaled the speed of the turn based on total turn. However, if the turn finishes before you add to it, it will think of it as a new turn and turn just as slowly.
+Finally, I removed myself from the need to use the GLUT timer as i dont feel like its very nice. This was then replaced with the game loop from the citation above.
+The interpolation is kind of a nice feature as well to help smooth the transition between updating the cube and the cube acutally being drawn.
+
