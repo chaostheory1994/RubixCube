@@ -519,7 +519,9 @@ void RubixCube::reset_cube(int n){
 	main_degrees = 0;
 	main_progress = 0;
 	opp_degrees = 0;
-	opp_degrees = 0;
+	opp_progress = 0;
+	// Kill solving
+	solving = false;
 	// Empty event queue
 	while (!q.empty()){
 		temp = q.front();
@@ -535,7 +537,6 @@ void RubixCube::reset_cube(int n){
 	}
 	// Shuffle the cube
 	shuffle_cube(n);
-	
 }
 
 void RubixCube::print_debug(){
@@ -796,20 +797,12 @@ void RubixCube::turn_side(int s, int d, bool anim){
 		}
 		// This is the check for the special case described above.
 		if (abs(main_degrees) < abs(main_progress)){
-			while (abs(main_degrees) - 90 >= 0){
-				main_degrees += (90 * dir);
-				main_progress += (90 * dir);
-			}
-			main_degrees += (90 * dir);
-			main_progress += (90 * dir);
+			main_progress += (90 * dir) - main_degrees;
+			main_degrees += (90 * dir) - main_degrees;
 		}
 		if (abs(opp_degrees) < abs(opp_progress)){
-			while (abs(opp_degrees) - 90 >= 0){
-				opp_degrees += (90 * dir);
-				opp_progress += (90 * dir);
-			}
-			opp_degrees += (90 * dir);
-			opp_progress += (90 * dir);
+			opp_progress += (90 * dir) - opp_degrees;
+			opp_degrees += (90 * dir) - opp_degrees;
 		}
 	}
     
@@ -825,7 +818,7 @@ void RubixCube::shuffle_cube(int n){
 	int i;
 	int t;
 	queue_packet *qp;
-	if (n <= 0) n = DEFAULT_SHUFFLE;
+	if (n < 0) n = DEFAULT_SHUFFLE;
 	for (i = 0; i < n; i++){
 		// First we create a new queue packet.
 		qp = new queue_packet;

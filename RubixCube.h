@@ -34,7 +34,7 @@
 #define DEFAULT_SHUFFLE 5
 
 // Rotation Speed
-#define BLOCK_ROTATE_SPEED 5000 /* msec to take for a row/col to turn 90 degrees */
+#define BLOCK_ROTATE_SPEED 2500 /* msec to take for a row/col to turn 90 degrees */
 
 
 using std::queue;

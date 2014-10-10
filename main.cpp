@@ -131,7 +131,7 @@ void my_setup(int argc, char **argv) {
     rc.print_debug();
 #endif
     thetaX = 0;
-	thetaY = 0; 
+	thetaY = 0;
 	thetaZ = 0;
 	frames = 0;
 	fps = 0;
@@ -140,6 +140,7 @@ void my_setup(int argc, char **argv) {
 		shuffle_count = atoi(argv[1]);
 	}
 	else shuffle_count = -1;
+	rc.shuffle_cube(shuffle_count);
     return;
 }
 
@@ -211,7 +212,7 @@ void my_keyboard( unsigned char key, int x, int y ) {
 			rc.push_turn(4, -1);
 			break;
 		case 'n':
-			rc.reset_cube(-1);
+			rc.reset_cube(shuffle_count);
 			break;
 		case 'N':
 			thetaX = 0;
