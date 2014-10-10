@@ -171,10 +171,59 @@ RubixCube::RubixCube(const RubixCube& orig) {
 
 /* Deconstructor */
 RubixCube::~RubixCube() {
+    int i, j;
+    queue_packet *temp;
     // Delete all the blocks.
     // Delete all the bridges
     // Delete all the cores.
+    // Deleting Top and Bottom
+    for(i = 0; i < 6; i +=5){
+        delete cores[i]->b;
+        for(j = 0; j < 2; j++){
+            delete cores[i]->br[0]->c[j];
+        }
+        delete cores[i]->br[0]->b;
+        delete cores[i]->br[0];
+        
+        for(j = 0; j < 2; j++){
+            delete cores[i]->br[3]->c[j];
+        }
+        delete cores[i]->br[3]->b;
+        delete cores[i]->br[3];
+        
+        delete cores[i]->br[1]->b;
+        delete cores[i]->br[1];
+        delete cores[i]->br[2]->b;
+        delete cores[i]->br[2];
+        delete cores[i];
+    }
+    
+    // Deleting Right and Left side
+    for(i = 1; i < 4; i+=2){
+        delete cores[i]->b;
+        for(j = 1; j < 3; j++){
+            delete cores[i]->br[j]->b;
+            delete cores[i]->br[j];
+        }
+        delete cores[i];
+    }
+    
+    // Deleting Front and Back
+    delete cores[2]->b;
+    delete cores[2];
+    delete cores[4]->b;
+    delete cores[4];
     // Delete all the events.
+    while(!q.empty()){
+        temp = q.front();
+        q.pop();
+        delete temp;
+    }
+    while(!log.empty()){
+        temp = log.top();
+        log.pop();
+        delete temp;
+    }
     // Jobs done.
 }
 
